@@ -1,7 +1,12 @@
 package com.oceanbrasil.androidgps
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.core.app.ActivityCompat
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -10,6 +15,8 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.oceanbrasil.androidgps.databinding.ActivityMapsBinding
+
+const val LOCATION_PERMISSION_REQUEST_CODE = 1
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -41,8 +48,37 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap = googleMap
 
         // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-32.0, 151.0)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        val home = LatLng(-23.564628, -46.657185)
+        mMap.addMarker(MarkerOptions().position(home).title("Marker in São Paulo"))
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(home, 18f))
+        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL)
+
+        iniciarLocalizacao()
+    }
+
+    private fun iniciarLocalizacao() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this, arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ), LOCATION_PERMISSION_REQUEST_CODE
+            )
+
+            return
+        }
+
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        val locationProvider = LocationManager.GPS_PROVIDER
+
+        val ultimaLocalizacao = locationManager.getLastKnownLocation(locationProvider)
     }
 }
