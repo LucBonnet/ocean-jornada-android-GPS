@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -80,5 +81,36 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val locationProvider = LocationManager.GPS_PROVIDER
 
         val ultimaLocalizacao = locationManager.getLastKnownLocation(locationProvider)
+
+        Toast.makeText(
+            this,
+            "Lat: ${ultimaLocalizacao?.latitude}, Long: ${ultimaLocalizacao?.longitude}",
+            Toast.LENGTH_LONG
+        ).show()
+
+        // valida se a ultimaLocalizacao existe
+        ultimaLocalizacao?.let {
+            val latLng = LatLng(it.latitude, it.longitude)
+
+            mMap.addMarker(MarkerOptions().position(latLng).title("Minha localização"))
+            mMap.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    latLng,
+                    18f
+                )
+            )
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            iniciarLocalizacao()
+        }
     }
 }
